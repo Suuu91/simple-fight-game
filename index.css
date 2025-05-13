@@ -1,0 +1,14 @@
+canvas {
+  background-color: black;
+ }
+
+header {
+  text-align: center;
+  font-family: sans-serif;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
