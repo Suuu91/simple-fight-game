@@ -1,13 +1,12 @@
 const canvas = document.querySelector("canvas");
 const context = canvas.getContext(`2d`);
-
 canvas.width = 1024;
 canvas.height = 576;
 
-const gravity = 0.6 //global variable to add gravity to characters' y velocity
+const gravity = 0.6 // gravity to be added to characters' y velocity
 
 class Sprite {
-  constructor ({position, velocity, color}) {
+  constructor ({position, velocity, color, offset}) {
     this.position = position
     this.velocity = velocity
     this.width = 50
@@ -15,9 +14,13 @@ class Sprite {
     this.lastKey
     this.color = color
     this.hitBox = {
-      position: this.position,
+      position: {
+        x: this.position.x,
+        y: this.position.y
+      },
       width: 100,
-      height: 50
+      height: 50,
+      offset
     }
     this.isAttacking
   };
@@ -40,12 +43,14 @@ class Sprite {
 
   update() {
     this.draw()
+    this.hitBox.position.x = this.position.x + this.hitBox.offset.x //ensure hitbox-x goes with character
+    this.hitBox.position.y = this.position.y ////ensure hitbox-y goes with character
     this.position.x += this.velocity.x
     this.position.y += this.velocity.y
-    if (this.position.y + this.height + this.velocity.y >= canvas.height) {// when the character reach the bottom
+    if (this.position.y + this.height + this.velocity.y >= canvas.height) {// character reach the bottom
       this.velocity.y = 0 
     } else {
-      this.velocity.y += gravity // if characters aren't on ground, apply gravity to y-velocity
+      this.velocity.y += gravity // apply gravity to y-velocity if in air
     }
   }
 
@@ -67,7 +72,11 @@ const player = new Sprite({
     x: 0,
     y: 0
   },
-  color: `blue`
+  color: `blue`,
+  offset: {
+    x: 0,
+    y: 0
+  }
 });
 
 const enemy = new Sprite({
@@ -79,7 +88,11 @@ const enemy = new Sprite({
     x: 0,
     y: 0
   },
-  color: `red`
+  color: `red`,
+  offset: {
+    x: -50,
+    y: 0
+  }
 });
 
 const keys = {
@@ -88,6 +101,16 @@ const keys = {
   ArrowLeft: {pressed: false},
   ArrowRight: {pressed: false},
 };
+
+const rectCollision = ({rect1, rect2}) => {
+  return (
+    rect1.hitBox.position.x + rect1.hitBox.width >= rect2.position.x &&
+      rect1.hitBox.position.x <= rect2.position.x + rect2.width &&
+      rect1.hitBox.position.y + rect1.hitBox.height >= rect2.position.y &&
+      rect1.hitBox.position.y <= rect2.position.y + rect2.height &&
+      rect1.isAttacking 
+  )
+}
 
 const animate = () => {
   window.requestAnimationFrame(animate)
@@ -114,13 +137,12 @@ const animate = () => {
   }
 
   // detecting hitbox
-  if (player.hitBox.position.x + player.hitBox.width >= enemy.position.x &&
-      player.hitBox.position.x <= enemy.position.x + enemy.width &&
-      player.hitBox.position.y + player.hitBox.height >= enemy.position.y &&
-      player.hitBox.position.y <= enemy.position.y + enemy.height &&
-      player.isAttacking 
-    ) {
+  if (rectCollision({rect1: player, rect2: enemy}) && player.isAttacking ) {
     player.isAttacking = false  
+  }
+
+  if (rectCollision({rect1: enemy, rect2: player}) && enemy.isAttacking ) {
+    enemy.isAttacking = false  
   }
 }
 animate();
@@ -154,6 +176,9 @@ window.addEventListener(`keydown`, (e) => {
       break
     case `ArrowUp`:
       enemy.velocity.y = -18
+      break
+     case `/`:
+      enemy.attack()
       break
   }
 })
