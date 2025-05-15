@@ -23,21 +23,17 @@ class Sprite {
       offset
     }
     this.isAttacking
+    this.health = 100
   };
 
   draw() {
     context.fillStyle = this.color // fill rectangle with color
-    context.fillRect(this.position.x, this.position.y, this.width, this.height) // reate character rectangle
+    context.fillRect(this.position.x, this.position.y, this.width, this.height) // create character rectangle
     
     // hit box 
     if (this.isAttacking) {
       context.fillStyle = `green`
-      context.fillRect (
-        this.hitBox.position.x,
-        this.hitBox.position.y,
-        this.hitBox.width,
-        this.hitBox.height
-      )
+      context.fillRect (this.hitBox.position.x, this.hitBox.position.y, this.hitBox.width, this.hitBox.height)
     }
   }
 
@@ -61,7 +57,6 @@ class Sprite {
     }, 100)
   }
 };
-
 
 const player = new Sprite({
   position:{
@@ -112,6 +107,33 @@ const rectCollision = ({rect1, rect2}) => {
   )
 }
 
+// determine victory
+const determineWin = (timeoutId) => {
+  clearTimeout(timeoutId)
+  document.querySelector(`#result`).style.display = "flex"
+  if (player.health === enemy.health) {
+      document.querySelector(`#result`).innerHTML = "Tie"
+    } else if (player.health > enemy.health) {
+      document.querySelector(`#result`).innerHTML = "Player 1 Win"
+    } else if (enemy.health > player.health) {
+      document.querySelector(`#result`).innerHTML = "Player 2 Win"
+    }
+}
+
+// timer functionality
+let timer = 30
+let timeoutId
+const decreaseTimer = () => {
+  if (timer > 0) {
+    timer--
+    document.querySelector(`#timer`).innerHTML = timer
+    timeoutId = setTimeout(decreaseTimer, 1000)
+  } else if (timer === 0){
+    determineWin(timeoutId)
+  }
+}
+decreaseTimer()
+
 const animate = () => {
   window.requestAnimationFrame(animate)
   context.fillStyle = `black` //background color
@@ -138,11 +160,20 @@ const animate = () => {
 
   // detecting hitbox
   if (rectCollision({rect1: player, rect2: enemy}) && player.isAttacking ) {
-    player.isAttacking = false  
+    player.isAttacking = false
+    enemy.health -= 10
+    document.querySelector(`#enemyhpleft`).style.width = enemy.health + `%`  
   }
 
   if (rectCollision({rect1: enemy, rect2: player}) && enemy.isAttacking ) {
+    player.health -= 10
+    document.querySelector(`#playerhpleft`).style.width = player.health + `%`
     enemy.isAttacking = false  
+  }
+
+  // end game by eliminating opponent
+  if (player.health <= 0 || enemy.health <= 0) {
+    determineWin(timeoutId)
   }
 }
 animate();
