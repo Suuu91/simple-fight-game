@@ -1,3 +1,7 @@
+*{
+  box-sizing: border-box;
+} /* disregards padding towards width */
+
 canvas {
   background-color: black;
  }
@@ -10,5 +14,79 @@ header {
 body {
   display: flex;
   flex-direction: column;
+  align-items: center;
+}
+
+section {
+  position: relative;
+}
+
+section>div {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 10px;
+}
+
+#playerhpbar {
+  position: relative;
+  height: 30px;
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+}
+
+#enemyhpbar {
+  position: relative;
+  height: 30px;
+  width: 100%;
+}
+
+#playerhpleft {
+  position:absolute;
+  background-color: green;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 100%;
+}
+
+#enemyhpleft {
+  position:absolute;
+  background-color: green;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+
+#playerhp,#enemyhp {
+  background-color: white;
+  height: 30;
+  width: 100%;
+}
+
+#timer {
+  background-color: gray;
+  height: 85px;
+  width: 85px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
   justify-content: center;
+}
+
+#result {
+  color: white;
+  position: absolute;
+  align-items: center;
+  justify-content: center;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: none;
+  font-size: 50px;
 }
