@@ -92,7 +92,7 @@ const enemy = new Character({
   framesMax: 4,
   scale: 3.2,
   offset: {
-    x: 600,
+    x: 150,
     y: 260
   },
   frameTimeGap: 10,
