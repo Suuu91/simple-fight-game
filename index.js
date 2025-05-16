@@ -5,60 +5,26 @@ canvas.height = 576;
 
 const gravity = 0.6 // gravity to be added to characters' y velocity
 
-class Sprite {
-  constructor ({position, velocity, color, offset}) {
-    this.position = position
-    this.velocity = velocity
-    this.width = 50
-    this.height = 150
-    this.lastKey
-    this.color = color
-    this.hitBox = {
-      position: {
-        x: this.position.x,
-        y: this.position.y
-      },
-      width: 100,
-      height: 50,
-      offset
-    }
-    this.isAttacking
-    this.health = 100
-  };
+const background = new Sprite({
+  position: {
+    x:0,
+    y:0
+  },
+  imageSrc: `./assets/forest.png`
+})
 
-  draw() {
-    context.fillStyle = this.color // fill rectangle with color
-    context.fillRect(this.position.x, this.position.y, this.width, this.height) // create character rectangle
-    
-    // hit box 
-    if (this.isAttacking) {
-      context.fillStyle = `green`
-      context.fillRect (this.hitBox.position.x, this.hitBox.position.y, this.hitBox.width, this.hitBox.height)
-    }
-  }
+const fire = new Sprite({
+  position: {
+    x:60,
+    y:260
+  },
+  imageSrc: `./assets/fire.png`,
+  scale: 3,
+  framesMax: 4,
+  frameTimeGap: 20
+})
 
-  update() {
-    this.draw()
-    this.hitBox.position.x = this.position.x + this.hitBox.offset.x //ensure hitbox-x goes with character
-    this.hitBox.position.y = this.position.y ////ensure hitbox-y goes with character
-    this.position.x += this.velocity.x
-    this.position.y += this.velocity.y
-    if (this.position.y + this.height + this.velocity.y >= canvas.height) {// character reach the bottom
-      this.velocity.y = 0 
-    } else {
-      this.velocity.y += gravity // apply gravity to y-velocity if in air
-    }
-  }
-
-  attack() {
-    this.isAttacking = true
-    setTimeout(() => {
-      this.isAttacking = false
-    }, 100)
-  }
-};
-
-const player = new Sprite({
+const player = new Character({
   position:{
     x: 0,
     y: 0
@@ -74,7 +40,7 @@ const player = new Sprite({
   }
 });
 
-const enemy = new Sprite({
+const enemy = new Character({
   position:{
     x: 600,
     y: 100
@@ -97,47 +63,14 @@ const keys = {
   ArrowRight: {pressed: false},
 };
 
-const rectCollision = ({rect1, rect2}) => {
-  return (
-    rect1.hitBox.position.x + rect1.hitBox.width >= rect2.position.x &&
-      rect1.hitBox.position.x <= rect2.position.x + rect2.width &&
-      rect1.hitBox.position.y + rect1.hitBox.height >= rect2.position.y &&
-      rect1.hitBox.position.y <= rect2.position.y + rect2.height &&
-      rect1.isAttacking 
-  )
-}
-
-// determine victory
-const determineWin = (timeoutId) => {
-  clearTimeout(timeoutId)
-  document.querySelector(`#result`).style.display = "flex"
-  if (player.health === enemy.health) {
-      document.querySelector(`#result`).innerHTML = "Tie"
-    } else if (player.health > enemy.health) {
-      document.querySelector(`#result`).innerHTML = "Player 1 Win"
-    } else if (enemy.health > player.health) {
-      document.querySelector(`#result`).innerHTML = "Player 2 Win"
-    }
-}
-
-// timer functionality
-let timer = 30
-let timeoutId
-const decreaseTimer = () => {
-  if (timer > 0) {
-    timer--
-    document.querySelector(`#timer`).innerHTML = timer
-    timeoutId = setTimeout(decreaseTimer, 1000)
-  } else if (timer === 0){
-    determineWin(timeoutId)
-  }
-}
 decreaseTimer()
 
 const animate = () => {
   window.requestAnimationFrame(animate)
   context.fillStyle = `black` //background color
   context.fillRect(0, 0, canvas.width, canvas.height) //form background
+  background.update() // background sprite
+  fire.update()
   player.update() // player character
   enemy.update() // enemy character
   
@@ -173,7 +106,7 @@ const animate = () => {
 
   // end game by eliminating opponent
   if (player.health <= 0 || enemy.health <= 0) {
-    determineWin(timeoutId)
+    determineWin({player, enemy, timeoutId})
   }
 }
 animate();
