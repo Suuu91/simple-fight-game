@@ -1,6 +1,6 @@
 // class for sprite and animation
 class Sprite {
-  constructor ({position, imageSrc, scale=1, framesMax=1, frameTimeGap}) {
+  constructor ({position, imageSrc, scale=1, framesMax=1, frameTimeGap, offset={x:0,y:0}}) {
     this.position = position
     this.width = 50
     this.height = 150
@@ -11,6 +11,7 @@ class Sprite {
     this.currentFrame = 0 // current frame for animation, increase to animate
     this.frameTimeGap = frameTimeGap
     this.framesAnimated = 0
+    this.offset = offset
   };
 
   draw() {
@@ -22,15 +23,14 @@ class Sprite {
       this.image.width / this.framesMax,
       this.image.height,
 
-      this.position.x, 
-      this.position.y, 
+      this.position.x - this.offset.x, 
+      this.position.y - this.offset.y, 
       (this.image.width / this.framesMax) * this.scale, 
       this.image.height * this.scale
     )
   }
 
-  update() {
-    this.draw()
+  animateFrames() {
     this.framesAnimated++
     if (this.framesAnimated % this.frameTimeGap === 0) {
       if (this.currentFrame < this.framesMax -1 ) {
@@ -40,12 +40,24 @@ class Sprite {
       }
     }
   }
+
+  update() {
+    this.draw()
+    this.animateFrames()
+  }
 };
 
 // class for characters
-class Character {
-  constructor ({position, velocity, color, offset}) {
-    this.position = position
+class Character extends Sprite {
+  constructor ({position, velocity, color, offset, imageSrc, scale=1, framesMax=1, frameTimeGap, sprites}) {
+    super({
+      position,
+      imageSrc,
+      scale,
+      framesMax,
+      offset
+    })
+
     this.velocity = velocity
     this.width = 50
     this.height = 150
@@ -62,36 +74,79 @@ class Character {
     }
     this.isAttacking
     this.health = 100
-  };
+    this.currentFrame = 0 
+    this.frameTimeGap = frameTimeGap
+    this.framesAnimated = 0
+    this.sprites = sprites
 
-  draw() {
-    context.fillStyle = this.color // fill rectangle with color
-    context.fillRect(this.position.x, this.position.y, this.width, this.height) // create character rectangle
-    
-    // hit box 
-    if (this.isAttacking) {
-      context.fillStyle = `green`
-      context.fillRect (this.hitBox.position.x, this.hitBox.position.y, this.hitBox.width, this.hitBox.height)
+    for (const sprite in this.sprites) {
+      sprites[sprite].image = new Image()
+      sprites[sprite].image.src = sprites[sprite].imageSrc
     }
-  }
+  };
 
   update() {
     this.draw()
+    this.animateFrames()
     this.hitBox.position.x = this.position.x + this.hitBox.offset.x //ensure hitbox-x goes with character
     this.hitBox.position.y = this.position.y ////ensure hitbox-y goes with character
     this.position.x += this.velocity.x
     this.position.y += this.velocity.y
+
     if (this.position.y + this.height + this.velocity.y >= canvas.height - 26.5) {// character reach the bottom
-      this.velocity.y = 0 
+      this.velocity.y = 0
+      this.position.y = 400 // set character to ground level(round up to be a little higher)
     } else {
       this.velocity.y += gravity // apply gravity to y-velocity if in air
     }
   }
 
   attack() {
+    this.switchSprite(`attack`)
     this.isAttacking = true
     setTimeout(() => {
       this.isAttacking = false
     }, 100)
+  }
+
+  switchSprite(sprite) {
+    if (this.image === this.sprites.attack.image && this.currentFrame < this.framesMax -1) return // not call when attacking
+    switch (sprite) {
+      case `idle`:
+        if (this.image !== this.sprites.idle.image) {
+          this.image = this.sprites.idle.image
+          this.framesMax = this.sprites.idle.framesMax
+          this.currentFrame = 0 // ensure always start from the first frame when switching 
+        }
+        break
+      case `jump`:
+        if (this.image !== this.sprites.jump.image)  {
+          this.image = this.sprites.jump.image
+          this.framesMax = this.sprites.jump.framesMax
+          this.currentFrame = 0
+        }
+        break
+      case `run`:
+        if (this.image !== this.sprites.run.image) {
+          this.image = this.sprites.run.image
+          this.framesMax = this.sprites.run.framesMax
+          this.currentFrame = 0
+        }
+        break
+      case `fall`:
+        if (this.image !== this.sprites.fall.image) {
+          this.image = this.sprites.fall.image
+          this.framesMax = this.sprites.fall.framesMax
+          this.currentFrame = 0
+        }
+        break
+      case `attack`:
+        if (this.image !== this.sprites.attack.image) {
+          this.image = this.sprites.attack.image
+          this.framesMax = this.sprites.attack.framesMax
+          this.currentFrame = 0
+        }
+        break
+    }
   }
 };

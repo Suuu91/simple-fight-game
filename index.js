@@ -3,7 +3,7 @@ const context = canvas.getContext(`2d`);
 canvas.width = 1024;
 canvas.height = 576;
 
-const gravity = 0.6 // gravity to be added to characters' y velocity
+const gravity = 0.4 // gravity to be added to characters' y velocity
 
 const background = new Sprite({
   position: {
@@ -37,6 +37,40 @@ const player = new Character({
   offset: {
     x: 0,
     y: 0
+  },
+  imageSrc: `./assets/samurai/IDLE.png`,
+  framesMax: 8,
+  scale: 3.5,
+  offset: {
+    x: 240,
+    y: 275 
+  },
+  frameTimeGap: 10,
+  sprites: {
+    idle: {
+      imageSrc: `./assets/samurai/Idle.png`,
+      framesMax: 8
+    },
+    run: {
+      imageSrc: `./assets/samurai/Run.png`,
+      framesMax: 8
+    },
+    jump: {
+      imageSrc: `./assets/samurai/Jump.png`,
+      framesMax: 2
+    },
+    attack: {
+      imageSrc: `./assets/samurai/Attack.png`,
+      framesMax: 6
+    },
+    hurt: {
+      imageSrc: `./assets/samurai/Hurt.png`,
+      framesMax: 4
+    },
+    fall: {
+      imageSrc: `./assets/samurai/Fall.png`,
+      framesMax: 2
+    }
   }
 });
 
@@ -53,6 +87,40 @@ const enemy = new Character({
   offset: {
     x: -50,
     y: 0
+  },
+  imageSrc: `./assets/fighter/Idle.png`,
+  framesMax: 4,
+  scale: 3.2,
+  offset: {
+    x: 600,
+    y: 260
+  },
+  frameTimeGap: 10,
+  sprites: {
+    idle: {
+      imageSrc: `./assets/fighter/Idle.png`,
+      framesMax: 4
+    },
+    run: {
+      imageSrc: `./assets/fighter/Run.png`,
+      framesMax: 8
+    },
+    jump: {
+      imageSrc: `./assets/fighter/Jump.png`,
+      framesMax: 2
+    },
+    attack: {
+      imageSrc: `./assets/fighter/Attack.png`,
+      framesMax: 4
+    },
+    hurt: {
+      imageSrc: `./assets/fighter/Hurt.png`,
+      framesMax: 3
+    },
+    fall: {
+      imageSrc: `./assets/fighter/Fall.png`,
+      framesMax: 2
+    }
   }
 });
 
@@ -80,15 +148,35 @@ const animate = () => {
   // player movement
   if (keys.a.pressed && player.lastKey === `a`) {
     player.velocity.x = -3
+    player.switchSprite(`run`)
   } else if (keys.d.pressed && player.lastKey === `d`) {
     player.velocity.x = 3
+    player.switchSprite(`run`)
+  } else {
+    player.switchSprite(`idle`) // if not moving x-axis, switch back to idle
   }
-  
+  //player jump
+  if (player.velocity.y < 0) {
+    player.switchSprite(`jump`)
+  } else if (player.velocity.y > 0) {
+    player.switchSprite(`fall`)
+  }
+
   //enemy movement
   if (keys.ArrowLeft.pressed && enemy.lastKey === `ArrowLeft`) {
     enemy.velocity.x = -3
+    enemy.switchSprite(`run`)
   } else if (keys.ArrowRight.pressed && enemy.lastKey === `ArrowRight`) {
     enemy.velocity.x = 3
+    enemy.switchSprite(`run`)
+  } else {
+    enemy.switchSprite(`idle`)
+  }
+  //enemy jump
+  if (enemy.velocity.y < 0) {
+    enemy.switchSprite(`jump`)
+  } else if (enemy.velocity.y > 0) {
+    enemy.switchSprite(`fall`)
   }
 
   // detecting hitbox
@@ -123,7 +211,7 @@ window.addEventListener(`keydown`, (e) => {
       player.lastKey = `a`
       break
     case `w` :
-      player.velocity.y = -18
+      player.velocity.y = -14
       break
     case ` `:
       player.attack()
@@ -139,7 +227,7 @@ window.addEventListener(`keydown`, (e) => {
       enemy.lastKey = `ArrowLeft`
       break
     case `ArrowUp`:
-      enemy.velocity.y = -18
+      enemy.velocity.y = -14
       break
      case `/`:
       enemy.attack()
