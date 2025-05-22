@@ -209,12 +209,18 @@ const animate = () => {
   if (rectCollision({rect1: player, rect2: enemy}) && player.isAttacking && player.currentFrame === 4) {
     player.isAttacking = false
     enemy.takeHit()
-    document.querySelector(`#enemyhpleft`).style.width = enemy.health + `%`  
+    // animation of hp going down
+    gsap.to(`#enemyhpleft`, {
+      width: enemy.health + `%`
+    })
   }
   if (rectCollision({rect1: enemy, rect2: player}) && enemy.isAttacking && enemy.currentFrame === 2) {
     enemy.isAttacking = false  
     player.takeHit()
-    document.querySelector(`#playerhpleft`).style.width = player.health + `%`
+    // animation of hp going down
+    gsap.to(`#playerhpleft`, {
+      width: player.health + `%`
+    })
   }
 
   // if attack misses
