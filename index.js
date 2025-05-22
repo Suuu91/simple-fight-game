@@ -71,6 +71,14 @@ const player = new Character({
       imageSrc: `./assets/samurai/Fall.png`,
       framesMax: 2
     }
+  },
+  hitBox: {
+    offset: {
+      x: 150,
+      y: 30
+    },
+    width: 120,
+    height: 50
   }
 });
 
@@ -121,6 +129,14 @@ const enemy = new Character({
       imageSrc: `./assets/fighter/Fall.png`,
       framesMax: 2
     }
+  },
+  hitBox: {
+    offset: {
+      x: -200,
+      y: 50
+    },
+    width: 150,
+    height: 50
   }
 });
 
@@ -180,17 +196,25 @@ const animate = () => {
   }
 
   // detecting hitbox
-  if (rectCollision({rect1: player, rect2: enemy}) && player.isAttacking ) {
+  if (rectCollision({rect1: player, rect2: enemy}) && player.isAttacking && player.currentFrame === 4) {
     player.isAttacking = false
-    enemy.health -= 10
+    enemy.health -= 12.5
     document.querySelector(`#enemyhpleft`).style.width = enemy.health + `%`  
   }
-
-  if (rectCollision({rect1: enemy, rect2: player}) && enemy.isAttacking ) {
+  if (rectCollision({rect1: enemy, rect2: player}) && enemy.isAttacking && enemy.currentFrame === 2) {
     player.health -= 10
     document.querySelector(`#playerhpleft`).style.width = player.health + `%`
     enemy.isAttacking = false  
   }
+
+  // if attack misses
+  if (player.isAttacking && player.currentFrame === 4) {
+    player.isAttacking = false
+  }
+   if (enemy.isAttacking && enemy.currentFrame === 2) {
+    enemy.isAttacking = false
+  }
+  
 
   // end game by eliminating opponent
   if (player.health <= 0 || enemy.health <= 0) {

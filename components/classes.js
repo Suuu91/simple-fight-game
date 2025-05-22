@@ -1,6 +1,13 @@
 // class for sprite and animation
 class Sprite {
-  constructor ({position, imageSrc, scale=1, framesMax=1, frameTimeGap, offset={x:0,y:0}}) {
+  constructor ({
+    position, 
+    imageSrc, 
+    scale=1, 
+    framesMax=1, 
+    frameTimeGap, 
+    offset={x:0,y:0}
+  }) {
     this.position = position
     this.width = 50
     this.height = 150
@@ -49,7 +56,17 @@ class Sprite {
 
 // class for characters
 class Character extends Sprite {
-  constructor ({position, velocity, color, offset, imageSrc, scale=1, framesMax=1, frameTimeGap, sprites}) {
+  constructor ({
+    position, 
+    velocity, 
+    color, offset, 
+    imageSrc, 
+    scale=1, 
+    framesMax=1, 
+    frameTimeGap, 
+    sprites,
+    hitBox = {offset: {}, width: undefined, height: undefined}
+  }) {
     super({
       position,
       imageSrc,
@@ -68,9 +85,9 @@ class Character extends Sprite {
         x: this.position.x,
         y: this.position.y
       },
-      width: 100,
-      height: 50,
-      offset
+      width: hitBox.width,
+      height: hitBox.height,
+      offset: hitBox.offset
     }
     this.isAttacking
     this.health = 100
@@ -89,7 +106,7 @@ class Character extends Sprite {
     this.draw()
     this.animateFrames()
     this.hitBox.position.x = this.position.x + this.hitBox.offset.x //ensure hitbox-x goes with character
-    this.hitBox.position.y = this.position.y ////ensure hitbox-y goes with character
+    this.hitBox.position.y = this.position.y + this.hitBox.offset.y ////ensure hitbox-y goes with character
     this.position.x += this.velocity.x
     this.position.y += this.velocity.y
 
@@ -104,9 +121,6 @@ class Character extends Sprite {
   attack() {
     this.switchSprite(`attack`)
     this.isAttacking = true
-    setTimeout(() => {
-      this.isAttacking = false
-    }, 100)
   }
 
   switchSprite(sprite) {
