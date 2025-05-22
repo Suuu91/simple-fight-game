@@ -70,6 +70,10 @@ const player = new Character({
     fall: {
       imageSrc: `./assets/samurai/Fall.png`,
       framesMax: 2
+    },
+    death: {
+      imageSrc: `./assets/samurai/Death.png`,
+      framesMax: 6
     }
   },
   hitBox: {
@@ -79,7 +83,8 @@ const player = new Character({
     },
     width: 120,
     height: 50
-  }
+  },
+  damageReceive: 10
 });
 
 const enemy = new Character({
@@ -128,6 +133,10 @@ const enemy = new Character({
     fall: {
       imageSrc: `./assets/fighter/Fall.png`,
       framesMax: 2
+    },
+    death: {
+      imageSrc: `./assets/fighter/Death.png`,
+      framesMax: 7
     }
   },
   hitBox: {
@@ -137,7 +146,8 @@ const enemy = new Character({
     },
     width: 150,
     height: 50
-  }
+  },
+  damageReceive: 12.5
 });
 
 const keys = {
@@ -198,13 +208,13 @@ const animate = () => {
   // detecting hitbox
   if (rectCollision({rect1: player, rect2: enemy}) && player.isAttacking && player.currentFrame === 4) {
     player.isAttacking = false
-    enemy.health -= 12.5
+    enemy.takeHit()
     document.querySelector(`#enemyhpleft`).style.width = enemy.health + `%`  
   }
   if (rectCollision({rect1: enemy, rect2: player}) && enemy.isAttacking && enemy.currentFrame === 2) {
-    player.health -= 10
-    document.querySelector(`#playerhpleft`).style.width = player.health + `%`
     enemy.isAttacking = false  
+    player.takeHit()
+    document.querySelector(`#playerhpleft`).style.width = player.health + `%`
   }
 
   // if attack misses
@@ -225,6 +235,7 @@ animate();
 
 window.addEventListener(`keydown`, (e) => {
   // listen on keys pressed for player
+  if (!player.dead) {
   switch (e.key) {
     case `d`:
       keys.d.pressed = true
@@ -240,8 +251,10 @@ window.addEventListener(`keydown`, (e) => {
     case ` `:
       player.attack()
       break
-
+  }};
     // listen on keys pressed for enemy
+  if (!enemy.dead) {
+  switch (e.key) {
     case `ArrowRight`:
       keys.ArrowRight.pressed = true
       enemy.lastKey = `ArrowRight`
@@ -256,7 +269,7 @@ window.addEventListener(`keydown`, (e) => {
      case `/`:
       enemy.attack()
       break
-  }
+  }};
 })
 
 window.addEventListener(`keyup`, (e) => {

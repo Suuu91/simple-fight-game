@@ -65,7 +65,8 @@ class Character extends Sprite {
     framesMax=1, 
     frameTimeGap, 
     sprites,
-    hitBox = {offset: {}, width: undefined, height: undefined}
+    hitBox = {offset: {}, width: undefined, height: undefined},
+    damageReceive
   }) {
     super({
       position,
@@ -95,6 +96,8 @@ class Character extends Sprite {
     this.frameTimeGap = frameTimeGap
     this.framesAnimated = 0
     this.sprites = sprites
+    this.damageReceive = damageReceive
+    this.dead
 
     for (const sprite in this.sprites) {
       sprites[sprite].image = new Image()
@@ -104,7 +107,7 @@ class Character extends Sprite {
 
   update() {
     this.draw()
-    this.animateFrames()
+    if (!this.dead) this.animateFrames()
     this.hitBox.position.x = this.position.x + this.hitBox.offset.x //ensure hitbox-x goes with character
     this.hitBox.position.y = this.position.y + this.hitBox.offset.y ////ensure hitbox-y goes with character
     this.position.x += this.velocity.x
@@ -123,8 +126,23 @@ class Character extends Sprite {
     this.isAttacking = true
   }
 
+  takeHit() {
+    this.health -= this.damageReceive
+    if (this.health <= 0) {
+      this.switchSprite(`death`)
+    } else {
+      this.switchSprite(`hurt`)
+    }
+  }
+
   switchSprite(sprite) {
-    if (this.image === this.sprites.attack.image && this.currentFrame < this.framesMax -1) return // not call when attacking
+    if (this.image === this.sprites.death.image) {
+      if (this.currentFrame === this.sprites.death.framesMax-1) {
+        this.dead = true
+      } return
+    };
+    if (this.image === this.sprites.attack.image && this.currentFrame < this.framesMax -1) return // override other sprites when attacking
+    if (this.image === this.sprites.hurt.image && this.currentFrame < this.framesMax -1) return // override other sprites when getting hit
     switch (sprite) {
       case `idle`:
         if (this.image !== this.sprites.idle.image) {
@@ -161,6 +179,20 @@ class Character extends Sprite {
           this.currentFrame = 0
         }
         break
+      case `hurt`:
+        if (this.image !== this.sprites.hurt.image) {
+          this.image = this.sprites.hurt.image
+          this.framesMax = this.sprites.hurt.framesMax
+          this.currentFrame = 0
+        }
+        break    
+      case `death`:
+        if (this.image !== this.sprites.death.image) {
+          this.image = this.sprites.death.image
+          this.framesMax = this.sprites.death.framesMax
+          this.currentFrame = 0
+        }
+        break      
     }
   }
 };
